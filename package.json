@@ -1,0 +1,22 @@
+{
+  "name": "the-palms-grill-fast-food",
+  "version": "1.0.0",
+  "description": "Modern food ordering website for The Palm's Grill & Fast Food",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"npm run dev --prefix admin\"",
+    "frontend": "npm run dev --prefix frontend",
+    "backend": "npm run dev --prefix backend"
+  },
+  "workspaces": [
+    "frontend",
+    "backend",
+    "admin"
+  ],
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "dependencies": {
+    "framer-motion": "^12.39.0",
+    "jsonwebtoken": "^9.0.3"
+  }
+}

@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #ff6b35;
+  --secondary: #f7931e;
+  --dark: #0f0f0f;
+  --card: #ffffff;
+  --muted: #6b7280;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: #fafafa;
+  color: #111;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-secondary text-white font-bold px-6 py-3 rounded-xl transition shadow-lg hover:shadow-xl hover:scale-[1.02];
+  }
+
+  .btn-outline {
+    @apply border-2 border-white/40 text-white font-bold px-6 py-3 rounded-xl hover:bg-white hover:text-dark transition;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-extrabold text-dark text-center mb-3;
+  }
+
+  .section-sub {
+    @apply text-center text-gray-500 mb-10 max-w-2xl mx-auto;
+  }
+
+  .food-card {
+    @apply bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 hover:-translate-y-1;
+  }
+}

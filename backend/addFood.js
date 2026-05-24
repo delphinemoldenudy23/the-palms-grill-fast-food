@@ -10,6 +10,9 @@ async function addFood() {
         description: "Spicy Ghanaian jollof rice served with chicken",
         category: "Rice Dishes",
         prices: { Small: 20, Medium: 30, Large: 40 },
+
+        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd",
+
         available: true
       })
     });

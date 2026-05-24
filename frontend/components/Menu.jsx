@@ -26,7 +26,13 @@ export default function Menu({ addToCart }) {
       .get(`/api/menu?_=${Date.now()}`)
       .then((res) => {
         setLoadError("");
-        setMenuItems(res.data.filter((i) => i.available !== false));
+
+        // ✅ FIXED SAFETY CHECK (IMPORTANT)
+        const data = Array.isArray(res.data)
+          ? res.data.filter((i) => i.available !== false)
+          : [];
+
+        setMenuItems(data);
       })
       .catch(() => {
         setLoadError(
@@ -67,6 +73,7 @@ export default function Menu({ addToCart }) {
         <p className="section-sub">
           Fresh rice dishes, yam specials &amp; BBQ — tap a size, then add to cart
         </p>
+
         <div className="text-center mb-6">
           <button
             type="button"
@@ -128,6 +135,7 @@ export default function Menu({ addToCart }) {
 
                   <div className="p-5 flex flex-col flex-1">
                     <h3 className="font-bold text-lg text-dark mb-1">{item.name}</h3>
+
                     {item.description && (
                       <p className="text-sm text-gray-500 mb-4 line-clamp-2">
                         {item.description}

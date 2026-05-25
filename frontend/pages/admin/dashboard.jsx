@@ -10,6 +10,8 @@ import {
   FaTrash,
 } from 'react-icons/fa'
 
+const API = "https://the-palms-grill-fast-food.onrender.com"
+
 export default function Dashboard() {
   const [stats, setStats] = useState({
     items: 0,
@@ -43,7 +45,7 @@ export default function Dashboard() {
 
   const fetchMenu = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/menu')
+      const res = await axios.get(`${API}/api/menu`)
       setMenuItems(res.data)
     } catch (err) {
       console.log(err)
@@ -71,7 +73,7 @@ export default function Dashboard() {
 
     if (editingId) {
       const res = await axios.put(
-        `http://localhost:5000/api/menu/${editingId}`,
+        `${API}/api/menu/${editingId}`,
         payload
       )
 
@@ -83,7 +85,7 @@ export default function Dashboard() {
       setEditingId(null)
     } else {
       const res = await axios.post(
-        'http://localhost:5000/api/menu',
+        `${API}/api/menu`,
         payload
       )
       setMenuItems([...menuItems, res.data])
@@ -113,7 +115,7 @@ export default function Dashboard() {
   }
 
   const handleDelete = async (id) => {
-    await axios.delete(`http://localhost:5000/api/menu/${id}`)
+    await axios.delete(`${API}/api/menu/${id}`)
     setMenuItems(menuItems.filter((item) => item._id !== id))
   }
 

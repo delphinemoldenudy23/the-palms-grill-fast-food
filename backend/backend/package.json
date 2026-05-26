@@ -1,0 +1,25 @@
+{
+  "name": "palms-grill-backend",
+  "version": "1.0.0",
+  "description": "Backend API for The Palm's Grill & Fast Food",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.40.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^8.0.0",
+    "multer": "^1.4.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

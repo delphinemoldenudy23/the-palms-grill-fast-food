@@ -15,11 +15,6 @@ const corsOrigins = process.env.CORS_ORIGINS
 app.use(cors({ origin: corsOrigins }));
 app.use(express.json({ limit: "10mb" }));
 
-app.use((req, res, next) => {
-  console.log("➡️ REQUEST:", req.method, req.url);
-  next();
-});
-
 // Static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 

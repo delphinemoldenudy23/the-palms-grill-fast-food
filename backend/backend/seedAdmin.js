@@ -1,11 +1,9 @@
-require("dotenv").config();
-
 const mongoose = require("mongoose");
 const Admin = require("./models/Admin");
 
 const RESET = process.argv.includes("--reset");
 
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect("mongodb://127.0.0.1:27017/palms-grill", {
   serverSelectionTimeoutMS: 5000,
 });
 
@@ -30,12 +28,11 @@ async function seedAdmin() {
       email: "admin@palmsgrill.com",
       password: "admin123",
     });
-
     console.log("Admin created: admin@palmsgrill.com / admin123");
-
     mongoose.connection.close();
   } catch (error) {
     console.error("Seed failed:", error.message);
+    console.error("Make sure MongoDB is running, then try again.");
     process.exit(1);
   }
 }

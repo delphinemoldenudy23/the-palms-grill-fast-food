@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Palm's Grill & Fast Food - Best Restaurant In Town</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f8f9fa;
+        }
+
+        /* Header & Navigation */
+        header {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .nav-links a:hover {
+            opacity: 0.8;
+        }
+
+        .cart-icon {
+            position: relative;
+            cursor: pointer;
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+
+        .cart-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #FF3333;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 15px;
+                font-size: 14px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #FF6B35;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #FF6B35;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 50px 20px;
+            }
+
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .hero p {
+                font-size: 16px;
+            }
+        }
+
+        /* Features Section */
+        .features-section {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 36px;
+            text-align: center;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+        }
+
+        .feature-card h3 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            color: #555;
+            border-bottom: 1px solid #eee;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Menu Section */
+        .menu-section {
+            background: #f8f9fa;
+            padding: 60px 20px;
+        }
+
+        .menu-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .menu-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .menu-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+        }
+
+        .menu-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #FFE5CC 0%, #FFC266 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-content {
+            padding: 20px;
+        }
+
+        .menu-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .menu-description {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .menu-price {
+            color: #FF6B35;
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .size-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .size-btn {
+            padding: 6px 12px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .size-btn.active {
+            background: #FF6B35;
+            color: white;
+            border-color: #FF6B35;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        /* Restaurant Info Section */
+        .info-section {
+            background: white;
+            padding: 60px 20px;
+        }
+
+        .info-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            margin-top: 40px;
+        }
+
+        .info-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            border-left: 5px solid #FF6B35;
+        }
+
+        .info-card h3 {
+            color: #FF6B35;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .info-card p {
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 15px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: #FF6B35;
+            color: white;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .social-link:hover {
+            background: #F7931E;
+            transform: scale(1.1);
+        }
+
+        /* Tech Stack Section */
+        .tech-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #eee 100%);
+            padding: 60px 20px;
+        }
+
+        .tech-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .tech-item {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .tech-item strong {
+            color: #FF6B35;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .tech-item p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Cart Modal */
+        .cart-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cart-modal.active {
+            display: flex;
+        }
+
+        .cart-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 10px;
+            padding: 30px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .cart-title {
+            color: #FF6B35;
+            margin-bottom: 20px;
+            clear: both;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item-info {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cart-item-size {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .cart-item-price {
+            color: #FF6B35;
+            font-weight: 600;
+            margin-right: 15px;
+        }
+
+        .remove-btn {
+            background: #FF3333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .remove-btn:hover {
+            background: #CC0000;
+        }
+
+        .cart-total {
+            text-align: right;
+            font-size: 18px;
+            font-weight: 600;
+            color: #FF6B35;
+            padding: 20px 0;
+            border-top: 2px solid #FF6B35;
+            margin-top: 20px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .checkout-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-cart p {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        /* Footer */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        footer p {
+            margin: 10px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 28px;
+            }
+
+            .features-grid, .menu-grid, .info-grid, .tech-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-links {
+                display: none;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-card, .menu-card, .info-card {
+            animation: slideIn 0.6s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">🍽️ The Palm's Grill</div>
+            <ul class="nav-links">
+                <li><a href="#menu">Menu</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li style="cursor: pointer;" class="cart-icon" onclick="toggleCart()">
+                    🛒
+                    <span class="cart-count" id="cartCount" style="display: none;">0</span>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>🍽️ The Palm's Grill & Fast Food</h1>
+        <p>"Best Restaurant In Town"</p>
+        <p style="font-size: 16px; margin-bottom: 30px;">Quality food delivered fast • Open 1 PM - 3 AM Daily</p>
+        <div class="cta-buttons">
+            <button class="btn btn-primary" onclick="document.getElementById('menu').scrollIntoView({behavior: 'smooth'})">Browse Menu</button>
+            <button class="btn btn-secondary" onclick="openWhatsApp()">Order on WhatsApp</button>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section" id="features">
+        <h2 class="section-title">✨ Why Choose Us?</h2>
+        
+        <div class="features-grid">
+            <!-- Customer Features -->
+            <div class="feature-card">
+                <h3>🛍️ Customer Features</h3>
+                <ul class="feature-list">
+                    <li>🍽️ Online Food Ordering System</li>
+                    <li>📱 Mobile Responsive Design</li>
+                    <li>🛒 Shopping Cart & Checkout</li>
+                    <li>🚚 Delivery Requests</li>
+                    <li>💬 WhatsApp/Contact Integration</li>
+                    <li>📱 Social Media Links</li>
+                    <li>🖼️ Beautiful Food Display</li>
+                    <li>💳 Multiple Payment Options</li>
+                </ul>
+            </div>
+
+            <!-- Admin Features -->
+            <div class="feature-card">
+                <h3>⚙️ Admin Dashboard</h3>
+                <ul class="feature-list">
+                    <li>➕ Add New Food Items</li>
+                    <li>✏️ Edit Prices Anytime</li>
+                    <li>🖼️ Image Management</li>
+                    <li>❌ Remove Items</li>
+                    <li>📋 Order Management</li>
+                    <li>🎯 Menu & Offers Updates</li>
+                    <li>📊 Analytics & Reports</li>
+                    <li>👥 Customer Management</li>
+                </ul>
+            </div>
+
+            <!-- Restaurant Info -->
+            <div class="feature-card">
+                <h3>🏪 Restaurant Info</h3>
+                <p><strong>⏰ Hours of Operation:</strong></p>
+                <p>Monday – Sunday: 1 PM – 3 AM</p>
+                <p style="margin-top: 15px;"><strong>📍 Location:</strong></p>
+                <p>Osu Kuku Hill</p>
+                <p style="margin-top: 15px;"><strong>📞 Contact:</strong></p>
+                <p>0551720664<br>0548270547</p>
+                <p style="margin-top: 15px;"><strong>✅ Delivery Available</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section -->
+    <section class="menu-section" id="menu">
+        <div class="menu-container">
+            <h2 class="section-title">🍽️ Our Menu</h2>
+            <div class="menu-grid" id="menuGrid"></div>
+        </div>
+    </section>
+
+    <!-- Restaurant Info Section -->
+    <section class="info-section" id="contact">
+        <div class="info-container">
+            <h2 class="section-title">📞 Contact & Social Media</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>📍 Location</h3>
+                    <p>Osu Kuku Hill</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">Easy to find, convenient location</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>📞 Phone Numbers</h3>
+                    <p>☎️ 0551720664</p>
+                    <p>☎️ 0548270547</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">Call for inquiries or orders</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>⏰ Hours of Operation</h3>
+                    <p>📅 Monday – Sunday</p>
+                    <p>🕐 1 PM – 3 AM</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">Always open when you're hungry</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>🚚 Delivery</h3>
+                    <p>✅ Delivery Available</p>
+                    <p>Fast delivery to your location</p>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">Request delivery when placing order</p>
+                </div>
+
+                <div class="info-card">
+                    <h3>💬 WhatsApp</h3>
+                    <p>Quick & Easy Ordering</p>
+                    <button class="btn btn-primary" onclick="openWhatsApp()" style="margin-top: 15px; padding: 8px 15px; font-size: 14px;">Chat on WhatsApp</button>
+                </div>
+
+                <div class="info-card">
+                    <h3>📱 Follow Us</h3>
+                    <div class="social-links">
+                        <a href="https://tiktok.com/@palms.grill.fast" target="_blank" class="social-link" title="TikTok">📱</a>
+                        <a href="https://facebook.com/palms.grill" target="_blank" class="social-link" title="Facebook">f</a>
+                        <a href="https://snapchat.com/add/palms.grill" target="_blank" class="social-link" title="Snapchat">👻</a>
+                    </div>
+                    <p style="font-size: 12px; color: #999; margin-top: 15px; text-align: center;">TikTok: palms.grill.fast<br>Facebook: palms grill<br>Snapchat: palms grill & fast food</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="tech-section">
+        <div class="tech-container">
+            <h2 class="section-title">🚀 Technology Stack</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <strong>Frontend</strong>
+                    <p>React.js / Next.js</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Backend</strong>
+                    <p>Node.js / Express.js</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Database</strong>
+                    <p>MongoDB / PostgreSQL</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Authentication</strong>
+                    <p>JWT Token Based</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Styling</strong>
+                    <p>Tailwind CSS</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Image Storage</strong>
+                    <p>Cloudinary</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Deployment</strong>
+                    <p>Vercel / Heroku</p>
+                </div>
+                <div class="tech-item">
+                    <strong>Payments</strong>
+                    <p>Stripe / PayPal Ready</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 The Palm's Grill & Fast Food. All rights reserved.</p>
+        <p>"Best Restaurant In Town" - Quality • Speed • Service</p>
+        <p>Open Daily: 1 PM - 3 AM | Osu Kuku Hill</p>
+    </footer>
+
+    <!-- Cart Modal -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <span class="close-btn" onclick="toggleCart()">&times;</span>
+            <h2 class="cart-title">🛒 Shopping Cart</h2>
+            <div id="cartItems"></div>
+            <div id="emptyCart" class="empty-cart">
+                <p>📭 Your cart is empty</p>
+                <p style="font-size: 14px;">Add items from the menu to get started!</p>
+            </div>
+            <div id="cartSummary" style="display: none;">
+                <div class="cart-total">Total: GH¢<span id="totalPrice">0</span></div>
+                <button class="checkout-btn" onclick="openWhatsApp()">📱 Checkout via WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Menu Data
+        const menuData = [
+            {
+                id: 1,
+                name: "Fried Rice with Chicken and Salad",
+                category: "Fried Rice",
+                emoji: "🍚",
+                sizes: [{size: "M", price: 35}, {size: "L", price: 50}]
+            },
+            {
+                id: 2,
+                name: "Chicken Fried Rice",
+                category: "Fried Rice",
+                emoji: "🍚",
+                sizes: [{size: "M", price: 65}, {size: "L", price: 120}]
+            },
+            {
+                id: 3,
+                name: "Beef Fried Rice",
+                category: "Fried Rice",
+                emoji: "🍚",
+                sizes: [{size: "M", price: 75}, {size: "L", price: 125}]
+            },
+            {
+                id: 4,
+                name: "Assorted Rice (Sausage & Gizzard)",
+                category: "Fried Rice",
+                emoji: "🍚",
+                sizes: [{size: "Regular", price: 50}]
+            },
+            {
+                id: 5,
+                name: "Yam with Fried Chicken Pepper",
+                category: "Yam & Sides",
+                emoji: "🍠",
+                sizes: [{size: "L", price: 60}]
+            },
+            {
+                id: 6,
+                name: "Fried Yam and Shito",
+                category: "Yam & Sides",
+                emoji: "🍠",
+                sizes: [{size: "Regular", price: 30}]
+            },
+            {
+                id: 7,
+                name: "Fried Yam with BBQ Chicken",
+                category: "Special Orders",
+                emoji: "🔥",
+                sizes: [{size: "3 sticks (M)", price: 75}, {size: "6 sticks (L)", price: 120}]
+            },
+            {
+                id: 8,
+                name: "Fried Yam with BBQ Pork",
+                category: "Special Orders",
+                emoji: "🔥",
+                sizes: [{size: "3 sticks (M)", price: 75}, {size: "6 sticks (L)", price: 120}]
+            },
+            {
+                id: 9,
+                name: "Fried Yam with Grilled Chicken Wings",
+                category: "Special Orders",
+                emoji: "🔥",
+                sizes: [{size: "M", price: 60}, {size: "L", price: 120}]
+            }
+        ];
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        // Initialize Menu
+        function initMenu() {
+            const menuGrid = document.getElementById('menuGrid');
+            menuGrid.innerHTML = '';
+            
+            menuData.forEach(item => {
+                const menuCard = document.createElement('div');
+                menuCard.className = 'menu-card';
+                menuCard.innerHTML = `
+                    <div class="menu-image">${item.emoji}</div>
+                    <div class="menu-content">
+                        <div class="menu-name">${item.name}</div>
+                        <div class="menu-description">${item.category}</div>
+                        <div class="menu-price">GH¢${item.sizes[0].price}</div>
+                        <div class="size-options" id="sizes-${item.id}">
+                            ${item.sizes.map((s, idx) => `
+                                <button class="size-btn ${idx === 0 ? 'active' : ''}" onclick="selectSize(${item.id}, '${s.size}', ${s.price})">${s.size}</button>
+                            `).join('')}
+                        </div>
+                        <button class="add-to-cart-btn" onclick="addToCart(${item.id}, '${item.name}', '${item.sizes[0].size}', ${item.sizes[0].price})">Add to Cart</button>
+                    </div>
+                `;
+                menuGrid.appendChild(menuCard);
+            });
+        }
+
+        let selectedSizes = {};
+
+        function selectSize(itemId, size, price) {
+            selectedSizes[itemId] = {size, price};
+            
+            // Update button states
+            document.querySelectorAll(`#sizes-${itemId} .size-btn`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update price
+            const item = menuData.find(i => i.id === itemId);
+            const priceElement = event.target.closest('.menu-card').querySelector('.menu-price');
+            priceElement.textContent = `GH¢${price}`;
+        }
+
+        function addToCart(itemId, itemName, size, price) {
+            const selected = selectedSizes[itemId];
+            const actualSize = selected ? selected.size : size;
+            const actualPrice = selected ? selected.price : price;
+
+            const cartItem = {
+                id: Date.now(),
+                itemId,
+                name: itemName,
+                size: actualSize,
+                price: actualPrice
+            };
+
+            cart.push(cartItem);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+            
+            // Show feedback
+            alert(`✅ ${itemName} (${actualSize}) added to cart!`);
+        }
+
+        function removeFromCart(cartItemId) {
+            cart = cart.filter(item => item.id !== cartItemId);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartItemsDiv = document.getElementById('cartItems');
+            const emptyCart = document.getElementById('emptyCart');
+            const cartSummary = document.getElementById('cartSummary');
+            const cartCount = document.getElementById('cartCount');
+
+            if (cart.length === 0) {
+                cartItemsDiv.innerHTML = '';
+                emptyCart.style.display = 'block';
+                cartSummary.style.display = 'none';
+                cartCount.style.display = 'none';
+            } else {
+                cartItemsDiv.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-size">${item.size}</div>
+                        </div>
+                        <div class="cart-item-price">GH¢${item.price}</div>
+                        <button class="remove-btn" onclick="removeFromCart(${item.id})">Remove</button>
+                    </div>
+                `).join('');
+                emptyCart.style.display = 'none';
+                cartSummary.style.display = 'block';
+                
+                // Update count
+                cartCount.textContent = cart.length;
+                cartCount.style.display = 'flex';
+                
+                // Update total
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                document.getElementById('totalPrice').textContent = total;
+            }
+        }
+
+        function toggleCart() {
+            document.getElementById('cartModal').classList.toggle('active');
+        }
+
+        function openWhatsApp() {
+            let message = "Hello! I would like to order from The Palm's Grill & Fast Food.\n\n";
+            
+            if (cart.length > 0) {
+                message += "My Order:\n";
+                cart.forEach(item => {
+                    message += `- ${item.name} (${item.size}): GH¢${item.price}\n`;
+                });
+                const total = cart.reduce((sum, item) => sum + item.price, 0);
+                message += `\nTotal: GH¢${total}\n\n";
+            }
+            
+            message += "Please confirm my order. 🙏";
+            
+            const phone = "233551720664"; // WhatsApp phone number
+            const encodedMessage = encodeURIComponent(message);
+            window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+        }
+
+        // Close cart when clicking outside
+        document.getElementById('cartModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                toggleCart();
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('load', function() {
+            initMenu();
+            updateCart();
+        });
+    </script>
+</body>
+</html>

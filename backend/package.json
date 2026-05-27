@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "name": "palms-grill-backend",
   "version": "1.0.0",
   "description": "Backend API for The Palm's Grill & Fast Food",
@@ -18,30 +17,10 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^8.0.0",
     "multer": "^1.4.4",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "socket.io": "^4.7.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-=======
-  "name": "the-palms-grill-fast-food",
-  "version": "1.0.0",
-  "description": "Modern food ordering website for The Palm's Grill & Fast Food",
-  "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\" \"npm run dev --prefix admin\"",
-    "frontend": "npm run dev --prefix frontend",
-    "backend": "npm run dev --prefix backend"
-  },
-  "workspaces": [
-    "frontend",
-    "backend",
-    "admin"
-  ],
-  "devDependencies": {
-    "concurrently": "^8.2.0"
-  },
-  "dependencies": {
-    "framer-motion": "^12.39.0",
-    "jsonwebtoken": "^9.0.3"
->>>>>>> 4190fec50306d67d003b4100e7e1b367ae0e95d7
   }
 }

@@ -4,8 +4,17 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const os = require("os");
+const http = require("http");
+const socketIO = require("socket.io");
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIO(server, {
+  cors: {
+    origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",").map((s) => s.trim()) : "*",
+    methods: ["GET", "POST"],
+  },
+});
 
 // CORS
 const corsOrigins = process.env.CORS_ORIGINS
@@ -43,6 +52,30 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/payment", paymentRoutes);
 
+// Socket.IO real-time event handlers
+io.on("connection", (socket) => {
+  console.log("✅ Socket connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("❌ Socket disconnected:", socket.id);
+  });
+
+  // Admin joins to receive order updates
+  socket.on("admin:join", () => {
+    socket.join("admin-room");
+    console.log("📱 Admin joined real-time room");
+  });
+
+  // Customer joins to track their order
+  socket.on("customer:track", (orderId) => {
+    socket.join(`order-${orderId}`);
+    console.log("👤 Customer tracking order:", orderId);
+  });
+});
+
+// Export io for use in routes
+app.set("io", io);
+
 // Get local IP (kept for local development only)
 function getLocalIp() {
   const nets = os.networkInterfaces();
@@ -66,9 +99,10 @@ mongoose
   .then(() => {
     console.log("MongoDB connected");
 
-    app.listen(PORT, HOST, () => {
+    server.listen(PORT, HOST, () => {
       console.log(`Server running on port ${PORT}`);
       console.log(`Health: http://localhost:${PORT}/api/health`);
+      console.log(`Socket.IO ready for real-time updates`);
 
       if (process.env.NODE_ENV !== "production") {
         const ip = getLocalIp();

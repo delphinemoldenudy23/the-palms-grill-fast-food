@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { FaCamera, FaSpinner, FaTrash } from "react-icons/fa";
 import { authApi } from "../lib/api";
 import FoodImage from "./FoodImage";
@@ -22,6 +22,29 @@ export default function ImageUpload({
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [savedMsg, setSavedMsg] = useState("");
+
+  const previewSrc = value ? resolveImageUrl(value) : null;
+  const canDelete = isUploadedImage(value);
+
+  // Reset internal state when value changes to empty (form reset)
+  useEffect(() => {
+    if (!value) {
+      setError("");
+      setSavedMsg("");
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    }
+  }, [value]);
+
+  // Reset internal state when editingItemId changes (switching between edit/add mode)
+  useEffect(() => {
+    setError("");
+    setSavedMsg("");
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }, [editingItemId]);
 
   const previewSrc = value ? resolveImageUrl(value) : null;
   const canDelete = isUploadedImage(value);

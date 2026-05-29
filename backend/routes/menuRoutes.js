@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { protect } = require("../middleware/authMiddleware");
 
 const {
   getMenu,
@@ -10,9 +11,9 @@ const {
 } = require("../controllers/menuController");
 
 router.get("/", getMenu);
-router.post("/", createMenuItem);
-router.patch("/:id/image", updateMenuImage);
-router.put("/:id", updateMenuItem);
-router.delete("/:id", deleteMenuItem);
+router.post("/", protect, createMenuItem);
+router.patch("/:id/image", protect, updateMenuImage);
+router.put("/:id", protect, updateMenuItem);
+router.delete("/:id", protect, deleteMenuItem);
 
 module.exports = router;

@@ -1,5 +1,10 @@
 const API_BASE = process.env.API_BASE_URL || "http://localhost:5000";
 
+// Log API_BASE for debugging
+if (process.env.NODE_ENV !== "production") {
+  console.log("Image URL API_BASE:", API_BASE);
+}
+
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop";
 
@@ -27,13 +32,13 @@ function withFallback(image) {
   return resolveImageUrl(image) || FALLBACK_IMG;
 }
 
-/** Store uploads as /uploads/file.jpg; keep full https URLs as-is */
+/** Store uploads as /uploads/file.jpg?v=timestamp; keep full https URLs as-is */
 function normalizeStoredImage(image) {
   if (!image || typeof image !== "string") return "";
   const trimmed = image.trim();
   if (!trimmed) return "";
   const idx = trimmed.indexOf("/uploads/");
-  if (idx !== -1) return trimmed.slice(idx).split("?")[0];
+  if (idx !== -1) return trimmed.slice(idx);
   return trimmed;
 }
 

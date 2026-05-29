@@ -3,6 +3,13 @@ const router = express.Router();
 const Order = require("../models/Order");
 const { MOMO_NUMBER } = require("../config/payment");
 
+// Generate unique order ID
+function generateOrderId() {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `ORD-${timestamp}-${random}`;
+}
+
 router.post("/", async (req, res) => {
   try {
     const { customer, items, total, orderType, notes, paymentMethod, paymentReference } =
@@ -24,6 +31,7 @@ router.post("/", async (req, res) => {
     const method = paymentMethod === "cash_on_delivery" ? "cash_on_delivery" : "momo";
 
     const order = new Order({
+      orderId: generateOrderId(),
       customerName: customer.name,
       customerPhone: customer.phone,
       orderType: type,
@@ -52,7 +60,21 @@ router.post("/", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const { phone, name, orderId } = req.query;
+    
+    // If no filter parameters provided, return all orders (for admin)
+    if (!phone && !name && !orderId) {
+      const orders = await Order.find().sort({ createdAt: -1 });
+      return res.json(orders);
+    }
+    
+    // Build filter based on provided parameters
+    const filter = {};
+    if (phone) filter.customerPhone = phone;
+    if (name) filter.customerName = { $regex: name, $options: "i" };
+    if (orderId) filter.orderId = orderId;
+    
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: "Could not fetch orders" });
@@ -70,6 +92,43 @@ router.patch("/:id", async (req, res) => {
     res.json(order);
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+});
+
+router.delete("/:id", async (req, res) => {
+  try {
+    const { customerPhone, deletedBy } = req.body;
+    
+    // Find the order first
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    
+    // Verify customer phone if deleted by customer
+    if (deletedBy === "customer" && order.customerPhone !== customerPhone) {
+      return res.status(403).json({ message: "Unauthorized: You can only delete your own orders" });
+    }
+    
+    await Order.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "Order deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Clear all orders (admin only)
+router.delete("/clear-all", protect, async (req, res) => {
+  try {
+    const result = await Order.deleteMany({});
+    res.json({
+      success: true,
+      message: `Deleted ${result.deletedCount} orders successfully`
+    });
+  } catch (err) {
+    console.error("Error clearing orders:", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear orders"
+    });
   }
 });
 

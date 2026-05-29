@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
+  orderId: { type: String, unique: true, required: true },
   customerName: { type: String, required: true },
   customerPhone: { type: String, required: true },
   orderType: { type: String, enum: ["delivery", "pickup"], default: "delivery" },

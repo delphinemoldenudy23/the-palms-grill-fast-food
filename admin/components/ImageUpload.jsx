@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { FaCamera, FaSpinner, FaTrash } from "react-icons/fa";
 import { authApi } from "../lib/api";
 import FoodImage from "./FoodImage";
@@ -26,6 +26,26 @@ export default function ImageUpload({
   const previewSrc = value ? resolveImageUrl(value) : null;
   const canDelete = isUploadedImage(value);
 
+  // Reset internal state when value changes to empty (form reset)
+  useEffect(() => {
+    if (!value) {
+      setError("");
+      setSavedMsg("");
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    }
+  }, [value]);
+
+  // Reset internal state when editingItemId changes (switching between edit/add mode)
+  useEffect(() => {
+    setError("");
+    setSavedMsg("");
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }, [editingItemId]);
+
   const applyImage = async (rawUrl) => {
     const stored = normalizeStoredImage(rawUrl);
     onChange(stored);
@@ -37,11 +57,12 @@ export default function ImageUpload({
         setSavedMsg("Saved — refresh customer website to see the new photo.");
         onImageSaved?.();
       } catch (err) {
-        setError(
-          err.response?.data?.message ||
-            "Photo uploaded but not saved. Click Update Item."
-        );
+        // Don't set error for save failure - the image was uploaded successfully
+        // Just show a warning message
+        setSavedMsg("Photo uploaded successfully. Click Update Item to save to menu.");
       }
+    } else if (!editingId) {
+      setSavedMsg("Photo uploaded successfully. Click Add Item to save to menu.");
     }
   };
 

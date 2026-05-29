@@ -31,12 +31,14 @@ router.post("/", protect, (req, res) => {
     }
 
     const imagePath = `/uploads/${req.file.filename}`;
-    const imageUrl = `${getBaseUrl(req)}${imagePath}`;
+    const timestamp = Date.now();
+    const imagePathWithCache = `${imagePath}?v=${timestamp}`;
+    const imageUrl = `${getBaseUrl(req)}${imagePathWithCache}`;
 
     res.status(201).json({
       message: "Image uploaded",
       imageUrl,
-      imagePath,
+      imagePath: imagePathWithCache,
       filename: req.file.filename,
     });
   });

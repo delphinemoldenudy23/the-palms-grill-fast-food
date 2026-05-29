@@ -40,7 +40,7 @@ const createMenuItem = async (req, res) => {
       description,
       category,
       prices: normalizePrices(prices),
-      image: storedImage || imageForItem(name, category),
+      image: storedImage || null,
       available: available !== false,
     });
     res.status(201).json(formatMenuItem(item));

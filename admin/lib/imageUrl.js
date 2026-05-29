@@ -31,12 +31,12 @@ export function isUploadedImage(image) {
   return Boolean(getUploadFilename(image));
 }
 
-/** Normalize for saving to database */
+/** Normalize for saving to database - preserves query string for cache-busting */
 export function normalizeStoredImage(image) {
   if (!image || typeof image !== "string") return "";
   const trimmed = image.trim();
   if (!trimmed) return "";
   const idx = trimmed.indexOf("/uploads/");
-  if (idx !== -1) return trimmed.slice(idx).split("?")[0];
+  if (idx !== -1) return trimmed.slice(idx);
   return trimmed;
 }

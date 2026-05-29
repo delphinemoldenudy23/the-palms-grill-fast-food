@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
-import { FALLBACK_IMG, withFallback } from "../lib/imageUrl";
+import { resolveImageUrl } from "../lib/imageUrl";
 
 export default function FoodImage({ src, alt, className }) {
-  const [imgSrc, setImgSrc] = useState(() => withFallback(src));
+  const [imgSrc, setImgSrc] = useState(() => resolveImageUrl(src) || "");
 
   useEffect(() => {
-    setImgSrc(withFallback(src));
+    setImgSrc(resolveImageUrl(src) || "");
   }, [src]);
+
+  // Don't show anything if there's no image
+  if (!imgSrc) {
+    return (
+      <div className={`${className} bg-gray-200 flex items-center justify-center text-gray-400 text-xs`}>
+        No image
+      </div>
+    );
+  }
 
   return (
     <img
@@ -15,7 +24,8 @@ export default function FoodImage({ src, alt, className }) {
       className={className}
       loading="lazy"
       onError={() => {
-        if (imgSrc !== FALLBACK_IMG) setImgSrc(FALLBACK_IMG);
+        // If image fails to load, show placeholder instead of fallback
+        setImgSrc("");
       }}
     />
   );

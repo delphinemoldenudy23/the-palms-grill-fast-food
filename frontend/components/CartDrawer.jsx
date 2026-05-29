@@ -80,8 +80,11 @@ export default function CartDrawer({
         paymentReference: paymentMethod === "momo" ? paymentReference : "",
       });
 
+      // Save customer phone to localStorage for order tracking
+      localStorage.setItem("customerPhone", customer.phone);
+
       setCart([]);
-      setCustomer({ name: "", phone: "", address: "" });
+      setCustomer({ name: "", phone: "", address: "", email: "" });
       setNotes("");
       setPaymentReference("");
       onOrderSuccess();
@@ -204,6 +207,13 @@ export default function CartDrawer({
                 name="phone"
                 placeholder="Phone *"
                 value={customer.phone}
+                onChange={handleChange}
+                className="w-full border rounded-xl px-4 py-2.5"
+              />
+              <input
+                name="email"
+                placeholder="Email (optional)"
+                value={customer.email || ""}
                 onChange={handleChange}
                 className="w-full border rounded-xl px-4 py-2.5"
               />

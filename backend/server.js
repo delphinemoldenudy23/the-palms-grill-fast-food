@@ -1,19 +1,47 @@
-require("dotenv").config();
+const dotenv = require("dotenv");
+dotenv.config();
+
 const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const os = require("os");
 const http = require("http");
-const socketIO = require("socket.io");
+const { Server } = require("socket.io");
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server, {
+
+// Socket.IO setup
+const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(",").map((s) => s.trim()) : "*",
+    origin: process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(",").map((s) => s.trim())
+      : "*",
     methods: ["GET", "POST"],
   },
+});
+
+// Make io accessible to routes
+app.set("io", io);
+
+// Socket.IO connection handling
+io.on("connection", (socket) => {
+  console.log("🔌 Client connected:", socket.id);
+
+  socket.on("join-admin", () => {
+    socket.join("admin");
+    console.log("👤 Admin joined admin room");
+  });
+
+  socket.on("join-customer", (phone) => {
+    socket.join(`customer-${phone}`);
+    console.log(`👤 Customer ${phone} joined their room`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔌 Client disconnected:", socket.id);
+  });
 });
 
 // CORS
@@ -29,8 +57,17 @@ app.use((req, res, next) => {
   next();
 });
 
-// Static files
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Static uploads
+app.use(
+  "/uploads",
+  (req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
+    next();
+  },
+  express.static(path.join(__dirname, "uploads"))
+);
 
 // Routes
 const menuRoutes = require("./routes/menuRoutes");
@@ -42,8 +79,11 @@ const statsRoutes = require("./routes/statsRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
 
 // Health check
-app.get("/api/health", (_req, res) => res.json({ ok: true }));
+app.get("/api/health", (_req, res) => {
+  res.json({ ok: true });
+});
 
+// API routes
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin", adminRoutes);
@@ -52,48 +92,30 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/payment", paymentRoutes);
 
-// Socket.IO real-time event handlers
-io.on("connection", (socket) => {
-  console.log("✅ Socket connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("❌ Socket disconnected:", socket.id);
-  });
-
-  // Admin joins to receive order updates
-  socket.on("admin:join", () => {
-    socket.join("admin-room");
-    console.log("📱 Admin joined real-time room");
-  });
-
-  // Customer joins to track their order
-  socket.on("customer:track", (orderId) => {
-    socket.join(`order-${orderId}`);
-    console.log("👤 Customer tracking order:", orderId);
-  });
-});
-
-// Export io for use in routes
-app.set("io", io);
-
-// Get local IP (kept for local development only)
+// Get local IP
 function getLocalIp() {
   const nets = os.networkInterfaces();
+
   for (const name of Object.keys(nets)) {
     for (const net of nets[name] || []) {
-      if (net.family === "IPv4" && !net.internal) return net.address;
+      if (net.family === "IPv4" && !net.internal) {
+        return net.address;
+      }
     }
   }
+
   return "localhost";
 }
 
 // ENV
 const PORT = process.env.PORT || 5000;
 const HOST = "0.0.0.0";
-const MONGODB_URI =
-  process.env.MONGO_URI || "mongodb://127.0.0.1:27017/palms-grill";
 
-// Connect DB + start server
+const MONGODB_URI =
+  process.env.MONGO_URI ||
+  "mongodb://127.0.0.1:27017/palms-grill";
+
+// Connect MongoDB
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
@@ -106,6 +128,7 @@ mongoose
 
       if (process.env.NODE_ENV !== "production") {
         const ip = getLocalIp();
+
         console.log(`Local: http://localhost:${PORT}`);
         console.log(`Network: http://${ip}:${PORT}`);
         console.log(`Share customer: http://${ip}:3000`);
@@ -117,3 +140,5 @@ mongoose
     console.log("MongoDB connection error:", err);
     process.exit(1);
   });
+
+module.exports = { io };

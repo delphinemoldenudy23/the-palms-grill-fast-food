@@ -14,7 +14,15 @@ const getBaseUrl = (req) => {
   if (process.env.API_BASE_URL) return process.env.API_BASE_URL;
   const host = req.get("host");
   const proto = req.protocol || "http";
-  return host ? `${proto}://${host}` : `http://localhost:${process.env.PORT || 5000}`;
+  const port = process.env.PORT || 5000;
+  
+  // If host already includes port, use it as-is
+  if (host && host.includes(":")) {
+    return `${proto}://${host}`;
+  }
+  
+  // Otherwise, add the port
+  return host ? `${proto}://${host}:${port}` : `http://localhost:${port}`;
 };
 
 router.post("/", protect, (req, res) => {
@@ -32,6 +40,8 @@ router.post("/", protect, (req, res) => {
 
     const imagePath = `/uploads/${req.file.filename}`;
     const imageUrl = `${getBaseUrl(req)}${imagePath}`;
+
+    console.log("Image uploaded:", { filename: req.file.filename, imagePath, imageUrl });
 
     res.status(201).json({
       message: "Image uploaded",

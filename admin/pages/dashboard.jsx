@@ -16,14 +16,18 @@ import {
 import SettingsPanel from "../components/SettingsPanel";
 import ImageUpload from "../components/ImageUpload";
 import FoodImage from "../components/FoodImage";
+import NotificationBell from "../components/NotificationBell";
 import { formatPrices, pricesToForm } from "../lib/menuHelpers";
 import { normalizeStoredImage } from "../lib/imageUrl";
+import { initAdminSocket } from "../lib/socket";
 
-import { getAPIUrl } from "../lib/api";
+import { getAPIUrl, authHeaders } from "../lib/api";
 
 const apiClient = axios.create();
 apiClient.interceptors.request.use((config) => {
   config.baseURL = getAPIUrl();
+  const headers = authHeaders();
+  config.headers = { ...config.headers, ...headers };
   return config;
 });
 
@@ -42,6 +46,10 @@ export default function Dashboard() {
   const [ordersError, setOrdersError] = useState("");
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [showNewOrderPopup, setShowNewOrderPopup] = useState(false);
+  const [newOrderData, setNewOrderData] = useState(null);
+  const [showClearStatsModal, setShowClearStatsModal] = useState(false);
+  const [clearPassword, setClearPassword] = useState("");
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -62,6 +70,8 @@ export default function Dashboard() {
       fetchStats();
       fetchMenu();
       fetchOrders();
+      // Initialize Socket.IO connection
+      initAdminSocket();
     }
   }, []);
 
@@ -105,6 +115,16 @@ export default function Dashboard() {
     setTab("orders");
     fetchOrders();
     fetchStats();
+  };
+
+  const handleNewOrder = (order) => {
+    fetchOrders();
+    fetchStats();
+    setNewOrderData(order);
+    setShowNewOrderPopup(true);
+    if (tab !== "orders") {
+      setTab("orders");
+    }
   };
 
   const handleChange = (e) => {
@@ -168,6 +188,9 @@ export default function Dashboard() {
       available: true,
     });
     setEditingId(null);
+    // Clear any file input to prevent image reuse
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) fileInput.value = "";
   };
 
   const handleEdit = (item) => {
@@ -236,15 +259,41 @@ export default function Dashboard() {
     router.push("/login");
   };
 
+  const handleClearStats = async () => {
+    if (clearPassword !== "admin") {
+      alert("Incorrect password.");
+      return;
+    }
+
+    if (!confirm("Are you sure you want to clear all orders, customers, and revenue data? This action cannot be undone.")) {
+      return;
+    }
+
+    try {
+      await apiClient.delete("/api/orders/clear-all");
+      fetchOrders();
+      fetchStats();
+      setShowClearStatsModal(false);
+      setClearPassword("");
+      alert("All stats cleared successfully.");
+    } catch (err) {
+      console.error("Error clearing stats:", err);
+      alert("Failed to clear stats. Please try again.");
+    }
+  };
+
   const menuCount = stats.items ?? menuItems.length;
 
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-dark text-white p-4 flex justify-between items-center">
         <h1 className="text-xl font-bold">The Palm&apos;s Grill Admin</h1>
-        <button onClick={handleLogout} className="bg-primary px-4 py-2 rounded-lg">
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          <NotificationBell onNewOrder={handleNewOrder} />
+          <button onClick={handleLogout} className="bg-primary px-4 py-2 rounded-lg">
+            Logout
+          </button>
+        </div>
       </nav>
 
       <div className="max-w-7xl mx-auto p-6">
@@ -282,14 +331,31 @@ export default function Dashboard() {
           >
             <FaCog /> settings
           </button>
+          <button
+            onClick={() => setShowClearStatsModal(true)}
+            className="px-5 py-2 rounded-lg font-semibold bg-red-500 text-white hover:bg-red-600"
+          >
+            Clear Stats
+          </button>
         </div>
 
         {tab === "menu" && (
           <>
             <div className="bg-white p-6 rounded-2xl shadow mb-8">
-              <h3 className="text-xl font-bold mb-4">
-                {editingId ? "Edit Menu Item" : "Add Menu Item"}
-              </h3>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">
+                  {editingId ? "Edit Menu Item" : "Add Menu Item"}
+                </h3>
+                {editingId && (
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="text-sm bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg font-semibold"
+                  >
+                    + New Item
+                  </button>
+                )}
+              </div>
               <form onSubmit={handleSubmit} className="grid md:grid-cols-2 gap-4">
                 <input name="name" placeholder="Food Name *" value={form.name} onChange={handleChange} className="border p-3 rounded-lg" required />
                 <input name="description" placeholder="Description" value={form.description} onChange={handleChange} className="border p-3 rounded-lg" />
@@ -304,7 +370,16 @@ export default function Dashboard() {
                   value={form.image}
                   editingItemId={editingId}
                   onChange={(url) => setForm((f) => ({ ...f, image: url }))}
-                  onImageSaved={fetchMenu}
+                  onImageSaved={() => {
+                    fetchMenu();
+                    // Only refresh the form if we're still editing the same item
+                    if (editingId) {
+                      const updatedItem = menuItems.find(item => item._id === editingId);
+                      if (updatedItem) {
+                        setForm((f) => ({ ...f, image: updatedItem.image }));
+                      }
+                    }
+                  }}
                 />
                 <div className="md:col-span-2 flex flex-wrap gap-2 items-center">
                   <input
@@ -329,9 +404,20 @@ export default function Dashboard() {
                   <input type="checkbox" name="available" checked={form.available} onChange={handleChange} />
                   Available on website
                 </label>
-                <button type="submit" className="md:col-span-2 bg-primary text-white py-3 rounded-lg font-bold">
-                  {editingId ? "Update Item" : "Add Item"}
-                </button>
+                <div className="md:col-span-2 flex gap-2">
+                  {editingId && (
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="flex-1 bg-gray-500 text-white py-3 rounded-lg font-bold"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button type="submit" className={`${editingId ? "flex-1" : "md:col-span-2"} bg-primary text-white py-3 rounded-lg font-bold`}>
+                    {editingId ? "Update Item" : "Add Item"}
+                  </button>
+                </div>
               </form>
             </div>
 
@@ -393,7 +479,8 @@ export default function Dashboard() {
                 <div key={o._id} className="border-b py-4">
                   <div className="flex flex-wrap justify-between gap-2">
                     <div>
-                      <p className="font-bold">{o.customerName} · {o.customerPhone}</p>
+                      <p className="font-bold">Order #{o.orderId || o._id.slice(-6).toUpperCase()}</p>
+                      <p className="text-sm text-gray-500">{o.customerName} · {o.customerPhone}</p>
                       <p className="text-sm text-gray-500">
                         {o.orderType || "delivery"} · {new Date(o.createdAt).toLocaleString()}
                       </p>
@@ -429,6 +516,7 @@ export default function Dashboard() {
                       <option value="pending">Pending</option>
                       <option value="confirmed">Confirmed</option>
                       <option value="preparing">Preparing</option>
+                      <option value="out_for_delivery">Out for Delivery</option>
                       <option value="delivered">Delivered</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
@@ -448,6 +536,81 @@ export default function Dashboard() {
         )}
 
         {tab === "settings" && <SettingsPanel />}
+
+        {/* New Order Popup */}
+        {showNewOrderPopup && newOrderData && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-green-100 p-3 rounded-full">
+                  <FaShoppingCart className="text-green-600 text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">New Order Received!</h3>
+              </div>
+              <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                <p className="font-semibold text-gray-900">
+                  Order #{newOrderData.orderId || newOrderData._id.slice(-6).toUpperCase()}
+                </p>
+                <p className="text-sm text-gray-600">{newOrderData.customerName}</p>
+                <p className="text-sm text-gray-600">{newOrderData.customerPhone}</p>
+                <p className="text-lg font-bold text-primary mt-2">GH¢{newOrderData.totalAmount}</p>
+              </div>
+              <button
+                onClick={() => setShowNewOrderPopup(false)}
+                className="w-full bg-primary text-white py-3 rounded-lg font-semibold hover:bg-primary/90"
+              >
+                View Order
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Clear Stats Modal */}
+        {showClearStatsModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="bg-red-100 p-3 rounded-full">
+                  <FaTrash className="text-red-600 text-2xl" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">Clear All Stats</h3>
+              </div>
+              <p className="text-gray-600 mb-4">
+                This will permanently delete all orders. This action cannot be undone.
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Enter password to confirm
+                </label>
+                <input
+                  type="password"
+                  value={clearPassword}
+                  onChange={(e) => setClearPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="w-full border rounded-lg px-4 py-3"
+                  onKeyPress={(e) => e.key === "Enter" && handleClearStats()}
+                />
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowClearStatsModal(false);
+                    setClearPassword("");
+                  }}
+                  className="flex-1 bg-gray-200 text-gray-800 py-3 rounded-lg font-semibold hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleClearStats}
+                  className="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600"
+                >
+                  Clear Stats
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

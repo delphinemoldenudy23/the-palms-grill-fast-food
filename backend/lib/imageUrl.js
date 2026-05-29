@@ -1,5 +1,6 @@
-const API_BASE = process.env.API_BASE_URL || "http://localhost:5000";
+const API_BASE = process.env.API_BASE_URL || "https://palms-grill-backend.onrender.com";
 
+export default API_BASE;
 // Log API_BASE for debugging
 if (process.env.NODE_ENV !== "production") {
   console.log("Image URL API_BASE:", API_BASE);

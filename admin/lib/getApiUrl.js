@@ -3,5 +3,10 @@ export function getApiUrl() {
 
   if (env) return env;
 
+  // Use localhost for local development
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return "http://localhost:5000";
+  }
+
   return "https://palms-grill-backend.onrender.com";
 }

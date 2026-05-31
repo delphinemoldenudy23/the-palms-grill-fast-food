@@ -1,22 +1,10 @@
-const path = require("path");
-const fs = require("fs");
 const multer = require("multer");
 
 const MAX_MB = 20;
 const MAX_BYTES = MAX_MB * 1024 * 1024;
 
-const uploadDir = path.join(__dirname, "../uploads");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => {
-    const safe = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "_");
-    cb(null, `${Date.now()}-${safe}`);
-  },
-});
+// Use memory storage for Cloudinary upload
+const storage = multer.memoryStorage();
 
 const allowedExt = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".heif"];
 const allowedMime = [
@@ -30,8 +18,9 @@ const allowedMime = [
 ];
 
 const fileFilter = (_req, file, cb) => {
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (allowedMime.includes(file.mimetype) || allowedExt.includes(ext)) {
+  const ext = file.originalname.toLowerCase().split(".").pop();
+  const extWithDot = "." + ext;
+  if (allowedMime.includes(file.mimetype) || allowedExt.includes(extWithDot)) {
     cb(null, true);
   } else {
     cb(

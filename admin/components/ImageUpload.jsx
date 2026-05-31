@@ -22,6 +22,7 @@ export default function ImageUpload({
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [savedMsg, setSavedMsg] = useState("");
+  const [publicId, setPublicId] = useState("");
 
   const previewSrc = value ? resolveImageUrl(value) : null;
   const canDelete = isUploadedImage(value);
@@ -40,9 +41,10 @@ export default function ImageUpload({
     if (inputRef.current) inputRef.current.value = "";
   }, [editingItemId]);
 
-  const applyImage = async (rawUrl) => {
+  const applyImage = async (rawUrl, uploadedPublicId) => {
     const stored = normalizeStoredImage(rawUrl);
     onChange(stored);
+    setPublicId(uploadedPublicId || "");
     setSavedMsg("");
 
     if (editingItemId && stored) {
@@ -83,14 +85,11 @@ export default function ImageUpload({
     try {
       const res = await authApi.post("/api/upload", formData);
 
-      // ✅ FIX: handle all backend response formats safely
-      const uploaded =
-        res.data.imagePath ||
-        res.data.imageUrl ||
-        res.data.url ||
-        "";
+      // Handle Cloudinary response format
+      const uploaded = res.data.imageUrl || res.data.imagePath || res.data.url || "";
+      const uploadedPublicId = res.data.public_id || "";
 
-      await applyImage(uploaded);
+      await applyImage(uploaded, uploadedPublicId);
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Session expired. Log out and log in again.");
@@ -112,7 +111,6 @@ export default function ImageUpload({
       return;
     }
 
-    const filename = getUploadFilename(value);
     if (!confirm("Delete this uploaded photo?")) return;
 
     setDeleting(true);
@@ -120,8 +118,16 @@ export default function ImageUpload({
     setSavedMsg("");
 
     try {
-      await authApi.delete(`/api/upload/${filename}`);
+      // Use Cloudinary delete endpoint with public_id
+      if (publicId) {
+        await authApi.delete("/api/upload", { data: { public_id } });
+      } else {
+        // Fallback for legacy images
+        const filename = getUploadFilename(value);
+        await authApi.delete(`/api/upload/${filename}`);
+      }
       onChange("");
+      setPublicId("");
     } catch (err) {
       setError(err.response?.data?.message || "Could not delete image");
     } finally {

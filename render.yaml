@@ -17,3 +17,9 @@ services:
         sync: false
       - key: API_BASE_URL
         value: https://palms-grill-backend.onrender.com
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false

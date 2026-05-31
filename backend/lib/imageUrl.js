@@ -13,9 +13,11 @@ function resolveImageUrl(image) {
     return "";
   }
   const trimmed = image.trim();
+  // Cloudinary URLs are full HTTPS URLs, return as-is
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     return trimmed;
   }
+  // Legacy /uploads/ paths (for backward compatibility during migration)
   if (trimmed.startsWith("/uploads/") || trimmed.startsWith("/")) {
     return `${API_BASE}${trimmed}`;
   }
@@ -24,19 +26,28 @@ function resolveImageUrl(image) {
 
 function getUploadFilename(image) {
   if (!image || typeof image !== "string") return null;
-  const match = image.match(/\/uploads\/([^/?#]+)/);
-  return match ? match[1] : null;
+  // For Cloudinary, extract public_id if possible
+  const cloudinaryMatch = image.match(/\/v\d+\/([^/]+)/);
+  if (cloudinaryMatch) return cloudinaryMatch[1];
+  // Legacy support for /uploads/ paths
+  const legacyMatch = image.match(/\/uploads\/([^/?#]+)/);
+  return legacyMatch ? legacyMatch[1] : null;
 }
 
 function withFallback(image) {
   return resolveImageUrl(image) || FALLBACK_IMG;
 }
 
-/** Store uploads as /uploads/file.jpg?v=timestamp; keep full https URLs as-is */
+/** Normalize image for storage - Cloudinary URLs are stored as-is */
 function normalizeStoredImage(image) {
   if (!image || typeof image !== "string") return "";
   const trimmed = image.trim();
   if (!trimmed) return "";
+  // Cloudinary URLs are full URLs, store as-is
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+  // Legacy support for /uploads/ paths
   const idx = trimmed.indexOf("/uploads/");
   if (idx !== -1) return trimmed.slice(idx);
   return trimmed;

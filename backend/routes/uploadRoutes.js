@@ -1,66 +1,112 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 const { protect } = require("../middleware/authMiddleware");
+const { MAX_MB } = require("../middleware/upload");
+const cloudinary = require("cloudinary").v2;
+const { Readable } = require("stream");
 
-// STORAGE CONFIG (same behavior you already had)
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const dir = path.join(__dirname, "../uploads");
-
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    cb(null, dir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
-  },
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
+
+// Use memory storage for Cloudinary upload
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB max
+    fileSize: MAX_MB * 1024 * 1024,
   },
 });
 
+// Helper function to upload buffer to Cloudinary
+const uploadToCloudinary = (buffer, filename) => {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: "palms-grill",
+        resource_type: "image",
+        allowed_formats: ["jpg", "jpeg", "png", "webp", "gif", "heic", "heif"],
+      },
+      (error, result) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(result);
+        }
+      }
+    );
 
-// ✅ UPLOAD IMAGE
-router.post("/", protect, upload.single("image"), (req, res) => {
+    // Create a readable stream from the buffer
+    const readableStream = new Readable();
+    readableStream._read = () => {};
+    readableStream.push(buffer);
+    readableStream.push(null);
+
+    readableStream.pipe(uploadStream);
+  });
+};
+
+// Helper function to delete from Cloudinary
+const deleteFromCloudinary = async (publicId) => {
+  try {
+    await cloudinary.uploader.destroy(publicId);
+    return true;
+  } catch (error) {
+    console.error("Cloudinary delete error:", error);
+    return false;
+  }
+};
+
+// UPLOAD IMAGE
+router.post("/", protect, upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    const result = await uploadToCloudinary(req.file.buffer, req.file.originalname);
+
+    console.log("Image uploaded to Cloudinary:", {
+      public_id: result.public_id,
+      secure_url: result.secure_url,
+    });
 
     res.json({
-      filename: req.file.filename,
-      imagePath: `/uploads/${req.file.filename}`,
-      imageUrl,
+      message: "Image uploaded",
+      imageUrl: result.secure_url,
+      public_id: result.public_id,
     });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Cloudinary upload error:", err);
+    res.status(500).json({ message: "Failed to upload image to Cloudinary" });
   }
 });
 
-// ❌ DELETE IMAGE (optional but safe)
-router.delete("/:filename", protect, (req, res) => {
+// DELETE IMAGE
+router.delete("/", protect, async (req, res) => {
   try {
-    const filePath = path.join(__dirname, "../uploads", req.params.filename);
+    const { public_id } = req.body;
 
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (!public_id) {
+      return res.status(400).json({ message: "Public ID is required for deletion" });
     }
 
-    res.json({ message: "Deleted successfully" });
+    const deleted = await deleteFromCloudinary(public_id);
+
+    if (deleted) {
+      console.log("Image deleted from Cloudinary:", public_id);
+      res.json({ message: "Image deleted", public_id });
+    } else {
+      res.status(500).json({ message: "Failed to delete image from Cloudinary" });
+    }
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Delete error:", err);
+    res.status(500).json({ message: err.message || "Could not delete image" });
   }
 });
 

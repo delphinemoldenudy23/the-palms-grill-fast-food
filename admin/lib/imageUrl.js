@@ -28,6 +28,13 @@ export function withFallback(image) {
 }
 
 export function isUploadedImage(image) {
+  if (!image || typeof image !== "string") return false;
+  const trimmed = image.trim();
+  // Cloudinary URLs are full HTTPS URLs
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return true;
+  }
+  // Legacy /uploads/ paths
   return Boolean(getUploadFilename(image));
 }
 

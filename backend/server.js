@@ -57,17 +57,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Static uploads
-app.use(
-  "/uploads",
-  (req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET");
-    res.header("Access-Control-Allow-Headers", "Content-Type");
-    next();
-  },
-  express.static(path.join(__dirname, "uploads"))
-);
+/* 
+🚫 LOCAL UPLOADS REMOVED
+Cloudinary will handle all image hosting
+*/
+// (removed express.static /uploads completely)
 
 // Routes
 const menuRoutes = require("./routes/menuRoutes");

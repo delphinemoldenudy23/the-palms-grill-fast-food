@@ -1,92 +1,55 @@
-const path = require("path");
-const fs = require("fs");
 const express = require("express");
-const multer = require("multer");
-const upload = require("../middleware/upload");
-const { MAX_MB } = require("../middleware/upload");
-const { protect } = require("../middleware/authMiddleware");
-const { getUploadFilename } = require("../lib/imageUrl");
-
 const router = express.Router();
-const uploadDir = path.join(__dirname, "../uploads");
+const { v2: cloudinary } = require("cloudinary");
+const streamifier = require("streamifier");
+const multer = require("multer");
+const { protect } = require("../middleware/authMiddleware");
 
-const getBaseUrl = (req) => {
-  if (process.env.API_BASE_URL) return process.env.API_BASE_URL;
-  const host = req.get("host");
-  const proto = req.protocol || "http";
-  const port = process.env.PORT || 5000;
-  
-  // If host already includes port, use it as-is
-  if (host && host.includes(":")) {
-    return `${proto}://${host}`;
-  }
-  
-  // Otherwise, add the port
-  return host ? `${proto}://${host}:${port}` : `http://localhost:${port}`;
-};
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-router.post("/", protect, (req, res) => {
-  upload.single("image")(req, res, (err) => {
-    if (err) {
-      if (err instanceof multer.MulterError && err.code === "LIMIT_FILE_SIZE") {
-        return res.status(400).json({ message: `Image must be under ${MAX_MB}MB` });
-      }
-      return res.status(400).json({ message: err.message || "Upload failed" });
-    }
+// Use memory storage (IMPORTANT)
+const upload = multer({ storage: multer.memoryStorage() });
 
+// Upload image to Cloudinary
+router.post("/", protect, upload.single("image"), async (req, res) => {
+  try {
     if (!req.file) {
-      return res.status(400).json({ message: "Please choose an image file" });
+      return res.status(400).json({ message: "No image provided" });
     }
 
-    const imagePath = `/uploads/${req.file.filename}`;
-    const imageUrl = `${getBaseUrl(req)}${imagePath}`;
+    const streamUpload = (req) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "palms-grill",
+          },
+          (error, result) => {
+            if (result) resolve(result);
+            else reject(error);
+          }
+        );
 
-    console.log("Image uploaded:", { filename: req.file.filename, imagePath, imageUrl });
+        streamifier.createReadStream(req.file.buffer).pipe(stream);
+      });
+    };
+
+    const result = await streamUpload(req);
+
+    console.log("Cloudinary upload success:", result.secure_url);
 
     res.status(201).json({
-      message: "Image uploaded",
-      imageUrl,
-      imagePath,
-      filename: req.file.filename,
+      message: "Image uploaded successfully",
+      imageUrl: result.secure_url,
+      public_id: result.public_id,
     });
-  });
-});
-
-router.delete("/:filename", protect, (req, res) => {
-  try {
-    const filename = path.basename(req.params.filename);
-    if (!filename || filename.includes("..")) {
-      return res.status(400).json({ message: "Invalid filename" });
-    }
-
-    const filePath = path.join(uploadDir, filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    res.json({ message: "Image deleted", filename });
   } catch (err) {
-    res.status(500).json({ message: err.message || "Could not delete image" });
-  }
-});
-
-router.delete("/", protect, (req, res) => {
-  try {
-    const imageRef = req.body?.image || req.body?.imageUrl || req.body?.imagePath;
-    const filename = getUploadFilename(imageRef) || path.basename(imageRef || "");
-
-    if (!filename || filename.includes("..")) {
-      return res.status(400).json({ message: "No uploaded image to delete" });
-    }
-
-    const filePath = path.join(uploadDir, filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-
-    res.json({ message: "Image deleted", filename });
-  } catch (err) {
-    res.status(500).json({ message: err.message || "Could not delete image" });
+    console.log("Upload error:", err);
+    res.status(500).json({ message: "Upload failed" });
   }
 });
 

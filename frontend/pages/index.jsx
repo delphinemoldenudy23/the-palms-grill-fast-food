@@ -1,5 +1,6 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 
 import Header from "../components/Header";
 import Hero from "../components/Hero";
@@ -17,6 +18,25 @@ export default function Home() {
   const [orderType, setOrderType] = useState("delivery");
   const [notes, setNotes] = useState("");
   const [customer, setCustomer] = useState({ name: "", phone: "", address: "" });
+
+  // 🔥 NEW: menu refresh trigger
+  const [menuVersion, setMenuVersion] = useState(0);
+
+  useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_API_URL);
+
+    socket.on("connect", () => {
+      console.log("🔌 Connected to realtime server");
+    });
+
+    // 🔥 REAL-TIME MENU UPDATE
+    socket.on("menu-updated", () => {
+      console.log("🔄 Menu updated from server");
+      setMenuVersion((prev) => prev + 1);
+    });
+
+    return () => socket.disconnect();
+  }, []);
 
   const addToCart = (item) => {
     setCart((prev) => {
@@ -75,7 +95,10 @@ export default function Home() {
       <Header cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
       <Hero />
       <Features />
-      <Menu addToCart={addToCart} />
+
+      {/* 🔥 PASS REALTIME TRIGGER */}
+      <Menu addToCart={addToCart} key={menuVersion} />
+
       <Contact />
       <Footer />
 

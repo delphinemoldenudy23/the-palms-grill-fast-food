@@ -26,7 +26,7 @@ export default function ImageUpload({
   const previewSrc = value ? resolveImageUrl(value) : null;
   const canDelete = isUploadedImage(value);
 
-  // Reset internal state when value changes to empty (form reset)
+  // Reset internal state when value changes to empty
   useEffect(() => {
     if (!value) {
       setError("");
@@ -37,7 +37,7 @@ export default function ImageUpload({
     }
   }, [value]);
 
-  // Reset internal state when editingItemId changes (switching between edit/add mode)
+  // Reset when switching edit/add mode
   useEffect(() => {
     setError("");
     setSavedMsg("");
@@ -48,20 +48,31 @@ export default function ImageUpload({
 
   const applyImage = async (rawUrl) => {
     const stored = normalizeStoredImage(rawUrl);
+
     onChange(stored);
     setSavedMsg("");
 
+    // EDIT MODE
     if (editingItemId && stored) {
       try {
-        await authApi.patch(`/api/menu/${editingItemId}/image`, { image: stored });
-        setSavedMsg("Saved — refresh customer website to see the new photo.");
+        await authApi.patch(`/api/menu/${editingItemId}/image`, {
+          image: stored,
+        });
+
+        setSavedMsg("Photo updated successfully.");
         onImageSaved?.();
+
+        // 🔥 global refresh trigger (fixes no-refresh issue)
+        window.dispatchEvent(new Event("menu-updated"));
       } catch (err) {
-        // Don't set error for save failure - the image was uploaded successfully
-        // Just show a warning message
-        setSavedMsg("Photo uploaded successfully. Click Update Item to save to menu.");
+        setSavedMsg(
+          "Photo uploaded successfully. Click Update Item to save to menu."
+        );
       }
-    } else if (!editingId) {
+    }
+
+    // ADD MODE
+    else if (!editingItemId) {
       setSavedMsg("Photo uploaded successfully. Click Add Item to save to menu.");
     }
   };
@@ -80,17 +91,22 @@ export default function ImageUpload({
     }
 
     setUploading(true);
+
     const formData = new FormData();
     formData.append("image", file);
 
     try {
       const res = await authApi.post("/api/upload", formData);
-      await applyImage(res.data.imagePath || res.data.imageUrl);
+
+      // FIX: always prefer imageUrl
+      await applyImage(res.data.imageUrl || res.data.imagePath);
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Session expired. Log out and log in again.");
       } else {
-        setError(err.response?.data?.message || "Upload failed. Is the backend running?");
+        setError(
+          err.response?.data?.message || "Upload failed. Is the backend running?"
+        );
       }
     } finally {
       setUploading(false);
@@ -160,12 +176,12 @@ export default function ImageUpload({
               alt="Preview"
               className="w-28 h-28 object-cover rounded-xl border shadow"
             />
+
             {canDelete && (
               <button
                 type="button"
                 onClick={handleDeleteImage}
                 disabled={deleting}
-                title="Delete uploaded file"
                 className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white w-8 h-8 rounded-full flex items-center justify-center shadow"
               >
                 {deleting ? (
@@ -186,11 +202,19 @@ export default function ImageUpload({
       )}
 
       {error && <p className="text-red-600 text-sm">{error}</p>}
-      {savedMsg && <p className="text-green-600 text-sm font-semibold">{savedMsg}</p>}
-      {value && !uploading && !savedMsg && !editingItemId && (
-        <p className="text-green-600 text-sm">Photo ready — click Add Item to publish.</p>
+      {savedMsg && (
+        <p className="text-green-600 text-sm font-semibold">{savedMsg}</p>
       )}
-      <p className="text-gray-400 text-xs">JPG, PNG, WEBP, GIF, HEIC · max {MAX_MB}MB</p>
+
+      {value && !uploading && !savedMsg && !editingItemId && (
+        <p className="text-green-600 text-sm">
+          Photo ready — click Add Item to publish.
+        </p>
+      )}
+
+      <p className="text-gray-400 text-xs">
+        JPG, PNG, WEBP, GIF, HEIC · max {MAX_MB}MB
+      </p>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
   resolveImageUrl,
 } from "../lib/imageUrl";
 
-const MAX_MB = 20;
+const MAX_MB = 50;
 
 export default function ImageUpload({
   value,
@@ -26,53 +26,38 @@ export default function ImageUpload({
   const previewSrc = value ? resolveImageUrl(value) : null;
   const canDelete = isUploadedImage(value);
 
-  // Reset internal state when value changes to empty
   useEffect(() => {
     if (!value) {
       setError("");
       setSavedMsg("");
-      if (inputRef.current) {
-        inputRef.current.value = "";
-      }
+      if (inputRef.current) inputRef.current.value = "";
     }
   }, [value]);
 
-  // Reset when switching edit/add mode
   useEffect(() => {
     setError("");
     setSavedMsg("");
-    if (inputRef.current) {
-      inputRef.current.value = "";
-    }
+    if (inputRef.current) inputRef.current.value = "";
   }, [editingItemId]);
 
   const applyImage = async (rawUrl) => {
     const stored = normalizeStoredImage(rawUrl);
-
     onChange(stored);
     setSavedMsg("");
 
-    // EDIT MODE
     if (editingItemId && stored) {
       try {
         await authApi.patch(`/api/menu/${editingItemId}/image`, {
           image: stored,
         });
-
-        setSavedMsg("Photo updated successfully.");
+        setSavedMsg("Saved — refresh customer website to see the new photo.");
         onImageSaved?.();
-
-        // 🔥 global refresh trigger (fixes no-refresh issue)
-        window.dispatchEvent(new Event("menu-updated"));
       } catch (err) {
         setSavedMsg(
           "Photo uploaded successfully. Click Update Item to save to menu."
         );
       }
-    }
-
-    // ADD MODE
-    else if (!editingItemId) {
+    } else {
       setSavedMsg("Photo uploaded successfully. Click Add Item to save to menu.");
     }
   };
@@ -98,14 +83,21 @@ export default function ImageUpload({
     try {
       const res = await authApi.post("/api/upload", formData);
 
-      // FIX: always prefer imageUrl
-      await applyImage(res.data.imageUrl || res.data.imagePath);
+      // ✅ FIX: handle all backend response formats safely
+      const uploaded =
+        res.data.imagePath ||
+        res.data.imageUrl ||
+        res.data.url ||
+        "";
+
+      await applyImage(uploaded);
     } catch (err) {
       if (err.response?.status === 401) {
         setError("Session expired. Log out and log in again.");
       } else {
         setError(
-          err.response?.data?.message || "Upload failed. Is the backend running?"
+          err.response?.data?.message ||
+            "Upload failed. Is the backend running?"
         );
       }
     } finally {
@@ -176,7 +168,6 @@ export default function ImageUpload({
               alt="Preview"
               className="w-28 h-28 object-cover rounded-xl border shadow"
             />
-
             {canDelete && (
               <button
                 type="button"
@@ -195,21 +186,9 @@ export default function ImageUpload({
         )}
       </div>
 
-      {editingItemId && (
-        <p className="text-xs text-blue-700 bg-blue-50 px-3 py-2 rounded-lg">
-          Editing: new photo saves automatically to the customer menu.
-        </p>
-      )}
-
       {error && <p className="text-red-600 text-sm">{error}</p>}
       {savedMsg && (
         <p className="text-green-600 text-sm font-semibold">{savedMsg}</p>
-      )}
-
-      {value && !uploading && !savedMsg && !editingItemId && (
-        <p className="text-green-600 text-sm">
-          Photo ready — click Add Item to publish.
-        </p>
       )}
 
       <p className="text-gray-400 text-xs">

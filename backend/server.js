@@ -1,6 +1,15 @@
 const dotenv = require("dotenv");
 dotenv.config();
 
+/* =========================
+   CLOUDINARY DEBUG (IMPORTANT)
+   ========================= */
+console.log("CLOUDINARY DEBUG:", {
+  cloud: process.env.CLOUDINARY_CLOUD_NAME,
+  key: process.env.CLOUDINARY_API_KEY,
+  secret: process.env.CLOUDINARY_API_SECRET ? "LOADED" : "MISSING",
+});
+
 const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
@@ -59,9 +68,8 @@ app.use((req, res, next) => {
 
 /* 
 🚫 LOCAL UPLOADS REMOVED
-Cloudinary will handle all image hosting
+Cloudinary handles image hosting
 */
-// (removed express.static /uploads completely)
 
 // Routes
 const menuRoutes = require("./routes/menuRoutes");

@@ -23,7 +23,9 @@ import { initAdminSocket } from "../lib/socket";
 
 import { getAPIUrl, authHeaders } from "../lib/api";
 
-const apiClient = axios.create();
+const apiClient = axios.create({
+  timeout: 180000, // 3 minutes timeout for image uploads
+});
 apiClient.interceptors.request.use((config) => {
   config.baseURL = getAPIUrl();
   const headers = authHeaders();

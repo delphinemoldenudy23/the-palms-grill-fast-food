@@ -11,7 +11,9 @@ export function authHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
-export const authApi = axios.create();
+export const authApi = axios.create({
+  timeout: 180000, // 3 minutes timeout for image uploads
+});
 
 authApi.interceptors.request.use((config) => {
   config.baseURL = getApiUrl();

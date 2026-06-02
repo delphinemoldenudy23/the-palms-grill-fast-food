@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
 const { MOMO_NUMBER } = require("../config/payment");
+const { protect } = require("../middleware/authMiddleware");
 
 // Generate unique order ID
 function generateOrderId() {
@@ -115,19 +116,19 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Clear all orders (admin only)
-router.delete("/clear-all", protect, async (req, res) => {
+// Reset all stats (admin only)
+router.delete("/reset-all", async (req, res) => {
   try {
     const result = await Order.deleteMany({});
     res.json({
       success: true,
-      message: `Deleted ${result.deletedCount} orders successfully`
+      message: `Reset ${result.deletedCount} orders successfully`
     });
   } catch (err) {
-    console.error("Error clearing orders:", err);
+    console.error("Error resetting orders:", err);
     res.status(500).json({
       success: false,
-      message: "Failed to clear orders"
+      message: "Failed to reset orders"
     });
   }
 });

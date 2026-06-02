@@ -232,21 +232,21 @@ router.get("/verify", async (req, res) => {
   }
 });
 
-// Clear all orders (admin only)
-router.delete("/clear-all", async (req, res) => {
+// Reset all stats (admin only)
+router.delete("/reset-all", async (req, res) => {
   try {
-    console.log("Clearing all orders...");
+    console.log("Resetting all orders...");
     const result = await Order.deleteMany({});
     console.log("Deleted", result.deletedCount, "orders");
     res.json({
       success: true,
-      message: `Deleted ${result.deletedCount} orders successfully`
+      message: `Reset ${result.deletedCount} orders successfully`
     });
   } catch (err) {
-    console.error("Error clearing orders:", err);
+    console.error("Error resetting orders:", err);
     res.status(500).json({
       success: false,
-      message: "Failed to clear orders"
+      message: "Failed to reset orders"
     });
   }
 });
